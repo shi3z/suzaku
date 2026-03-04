@@ -125,7 +125,29 @@ setup_ollama() {
     ensure_ollama_running
 }
 
+install_prerequisites() {
+    if [[ "$OS" == "linux" ]]; then
+        # zstd は Ollama インストーラーが必要とする
+        if ! command -v zstd &>/dev/null; then
+            info "zstd をインストール中 (Ollama インストールに必要)..."
+            if command -v apt-get &>/dev/null; then
+                sudo apt-get install -y zstd
+            elif command -v dnf &>/dev/null; then
+                sudo dnf install -y zstd
+            elif command -v yum &>/dev/null; then
+                sudo yum install -y zstd
+            elif command -v pacman &>/dev/null; then
+                sudo pacman -S --noconfirm zstd
+            else
+                warn "zstd を自動インストールできません。手動でインストールしてください"
+            fi
+        fi
+    fi
+}
+
 install_ollama() {
+    install_prerequisites
+
     if [[ "$OS" == "macos" ]]; then
         if command -v brew &>/dev/null; then
             info "Homebrew 経由で Ollama をインストール中..."
